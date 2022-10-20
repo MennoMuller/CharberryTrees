@@ -1,17 +1,20 @@
 package com.mennomuller;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Observia {
     public static void main(String[] args) {
         CharberryTree tree = new CharberryTree();
-        Harvester harvester = new Harvester();
+
         Notifier notifier = new Notifier();
+        tree.addListener(notifier);
+
+        Harvester harvester = new Harvester();
+        tree.addListener(harvester);
+
         while (true) {
             tree.maybeGrow();
-            if (notifier.handle(tree)) {
-                harvester.harvest(tree);
-            }
         }
     }
 }
@@ -19,10 +22,7 @@ public class Observia {
 class CharberryTree {
     private Random random = new Random();
     private boolean ripe = false;
-
-    public boolean isRipe() {
-        return ripe;
-    }
+    private ArrayList<TreeListener> listeners = new ArrayList<>();
 
     public void reset() {
         this.ripe = false;
@@ -30,23 +30,41 @@ class CharberryTree {
 
     public void maybeGrow() {
 // Only a tiny chance of ripening each time, but we try a lot!
-        if (random.nextDouble() < 0.00000001 && !ripe)
+        if (random.nextDouble() < 0.00000001 && !ripe) {
             ripe = true;
-    }
-}
-
-class Notifier {
-    public boolean handle(CharberryTree tree) {
-        if (tree.isRipe()) {
-            System.out.println("A charberry fruit has ripened!");
-            return true;
+            updateListeners();
         }
-        return false;
+    }
+
+    public void addListener(TreeListener listener) {
+        listeners.add(listener);
+    }
+
+    private void updateListeners() {
+        for (TreeListener listener : listeners) {
+            listener.handle(this);
+        }
+    }
+
+}
+
+interface TreeListener {
+    void handle(CharberryTree tree);
+}
+
+
+class Notifier implements TreeListener {
+    public void handle(CharberryTree tree) {
+        System.out.println("A charberry fruit has ripened!");
     }
 }
 
-class Harvester {
+class Harvester implements TreeListener {
     public void harvest(CharberryTree tree) {
         tree.reset();
+    }
+
+    public void handle(CharberryTree tree) {
+        harvest(tree);
     }
 }
