@@ -20,9 +20,9 @@ public class Observia {
 }
 
 class CharberryTree {
-    private Random random = new Random();
+    private final Random random = new Random();
     private boolean ripe = false;
-    private ArrayList<TreeListener> listeners = new ArrayList<>();
+    private final ArrayList<TreeListener> listeners = new ArrayList<>();
 
     public void reset() {
         this.ripe = false;
